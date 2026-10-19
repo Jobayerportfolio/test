@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobayer – Developer & UI/UX Designer</title>
+<meta name="description" content="Portfolio of Jobayer, developer and UI/UX designer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;500;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#060818; --deep:#0B1030; --ice:#8FE3FF; --plasma:#8A7BFF; --text:#E8ECFF; --dim:#98A2CF;
+  --glass:rgba(20,26,66,.45); --edge:rgba(143,227,255,.16);
+  --display:'Unbounded',system-ui,sans-serif; --body:'Figtree',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:radial-gradient(1200px 700px at 80% -10%,#1a1f5e 0%,transparent 60%),radial-gradient(900px 600px at -10% 40%,#15204f 0%,transparent 60%),var(--void);
+  color:var(--text);font:400 1.05rem/1.65 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ice);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1120px,92%);margin-inline:auto}
+
+/* Floating nav */
+nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:4px;padding:6px;
+  background:var(--glass);border:1px solid var(--edge);border-radius:999px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+nav a{padding:8px 16px;border-radius:999px;font-size:.92rem;color:var(--dim);transition:.25s}
+nav a:hover,nav a.on{color:var(--void);background:var(--ice)}
+
+/* Hero */
+.hero{position:relative;min-height:100svh;display:grid;align-items:center;overflow:hidden}
+#field{position:absolute;inset:0;width:100%;height:100%}
+.hero .wrap{position:relative;z-index:2;padding-top:90px}
+.status{display:inline-flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--edge);border-radius:999px;background:var(--glass);font-size:.9rem;color:var(--dim)}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--ice);box-shadow:0 0 12px var(--ice);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+h1{font:700 clamp(2.6rem,8.5vw,7rem)/1 var(--display);letter-spacing:-.04em;margin:26px 0 20px;
+  background:linear-gradient(100deg,#fff 10%,var(--ice) 55%,var(--plasma));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{max-width:34rem;color:var(--dim);font-size:1.2rem}
+.cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+.btn{padding:14px 26px;border-radius:14px;font-weight:600;transition:transform .2s,box-shadow .2s}
+.btn.p{background:linear-gradient(120deg,var(--ice),var(--plasma));color:var(--void);box-shadow:0 0 32px rgba(138,123,255,.35)}
+.btn.g{border:1px solid var(--edge);background:var(--glass)}
+.btn:hover{transform:translateY(-2px)}
+
+/* Sections */
+section{padding:110px 0}
+h2{font:500 clamp(1.7rem,4vw,2.7rem)/1.15 var(--display);letter-spacing:-.03em;margin-bottom:46px;max-width:20ch}
+.panel{background:var(--glass);border:1px solid var(--edge);border-radius:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+
+.about{display:grid;grid-template-columns:1.4fr 1fr;gap:28px}
+.about .panel{padding:34px}
+.about p+p{margin-top:16px;color:var(--dim)}
+.facts{display:grid;gap:22px;align-content:center}
+.facts b{display:block;font:500 2.2rem/1 var(--display);color:var(--ice);margin-bottom:6px}
+.facts span{color:var(--dim);font-size:.95rem}
+
+.skills{display:flex;flex-wrap:wrap;gap:12px}
+.skills span{padding:11px 20px;border:1px solid var(--edge);border-radius:999px;background:var(--glass);transition:.25s}
+.skills span:hover{border-color:var(--ice);box-shadow:0 0 22px rgba(143,227,255,.25);transform:translateY(-3px)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:24px}
+.card{position:relative;padding:30px;display:flex;flex-direction:column;gap:14px;overflow:hidden;min-height:280px;transition:border-color .3s}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(360px circle at var(--x,50%) var(--y,-40%),rgba(143,227,255,.16),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
+.card:hover{border-color:rgba(143,227,255,.5)}
+.card:hover::before{opacity:1}
+.card h3{font:500 1.25rem/1.25 var(--display);letter-spacing:-.02em}
+.card p{color:var(--dim);flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags small{font-size:.82rem;padding:4px 11px;border-radius:8px;background:rgba(138,123,255,.16);color:#CFC8FF}
+.card a.go{font-weight:600;color:var(--ice)}
+.card a.go:hover{text-decoration:underline}
+
+.contact .panel{padding:clamp(32px,6vw,72px);text-align:center;background:linear-gradient(140deg,rgba(143,227,255,.1),rgba(138,123,255,.14))}
+.contact h2{margin-inline:auto}
+.contact p{color:var(--dim);max-width:30rem;margin:0 auto 30px}
+.links{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:26px}
+.links a{color:var(--dim)}.links a:hover{color:var(--ice)}
+footer{padding:36px 0 50px;text-align:center;color:var(--dim);font-size:.9rem}
+
+@media(max-width:760px){.about{grid-template-columns:1fr}nav a{padding:8px 11px;font-size:.85rem}section{padding:80px 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<nav aria-label="Primary">
+  <a href="#top" class="on">Home</a><a href="#about">About</a><a href="#work">Work</a><a href="#contact">Contact</a>
+</nav>
+
+<header class="hero" id="top">
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="status"><i></i>Open to new projects</span>
+    <h1 id="name">Jobayer</h1>
+    <p class="lead" id="tagline">I design and build fast, clear interfaces for the web.</p>
+    <div class="cta">
+      <a class="btn p" href="#work">See my work</a>
+      <a class="btn g" href="#contact">Get in touch</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="about">
+  <div class="wrap">
+    <h2>Design and code, from one desk</h2>
+    <div class="about">
+      <div class="panel" id="bio"></div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="skills" id="skills" style="margin-top:36px"></div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <h2>Selected projects</h2>
+    <div class="grid" id="projects"></div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="wrap">
+    <div class="panel">
+      <h2>Have a project in mind?</h2>
+      <p>Tell me what you’re building and I’ll reply within two days.</p>
+      <a class="btn p" id="mail" href="mailto:you@example.com">Send an email</a>
+      <div class="links" id="social"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>© <span id="yr"></span> <span id="fname"></span>. Designed and built by hand.</footer>
+
+<script>
+/* ============ EDIT YOUR CONTENT HERE ============ */
+const ME = {
+  name: "Jobayer",
+  tagline: "I design and build fast, clear interfaces for the web.",
+  email: "you@example.com",
+  bio: [
+    "I’m a developer and UI/UX designer. I start with the person using the product, then shape the interface and write the code that makes it work.",
+    "Replace this paragraph with a short story about your background, what you enjoy building, and the kind of work you’re looking for."
+  ],
+  facts: [["3+", "Years building for the web"], ["20+", "Projects shipped"], ["2", "Hats: design and code"]],
+  skills: ["HTML & CSS","JavaScript","React","Node.js","Python","Figma","UI design","UX research","Prototyping","Git & GitHub"],
+  projects: [
+    { title: "Link Up", text: "A calm, installable puzzle game I designed and built from scratch. Math-driven motion, synthesized music, and a leaderboard.", tags: ["JavaScript","Canvas","UI/UX"], link: "link-up.html" },
+    { title: "Project two", text: "Describe what you built and what changed because of it.", tags: ["JavaScript","API"], link: "#" },
+    { title: "Project three", text: "Add the outcome: speed, users, or something you learned.", tags: ["Figma","Design system"], link: "#" }
+  ],
+  social: [["GitHub","https://github.com/askjobayer"],["LinkedIn","#"],["Dribbble","#"]]
+};
+/* ================================================== */
+
+const $ = id => document.getElementById(id);
+document.title = `${ME.name} – Developer & UI/UX Designer`;
+$("name").textContent = ME.name; $("tagline").textContent = ME.tagline; $("fname").textContent = ME.name;
+$("yr").textContent = new Date().getFullYear(); $("mail").href = "mailto:" + ME.email;
+ME.bio.forEach(t => { const p = document.createElement("p"); p.textContent = t; $("bio").append(p); });
+ME.facts.forEach(([n,l]) => $("facts").insertAdjacentHTML("beforeend", `<div><b>${n}</b><span>${l}</span></div>`));
+ME.skills.forEach(s => $("skills").insertAdjacentHTML("beforeend", `<span>${s}</span>`));
+ME.projects.forEach(p => $("projects").insertAdjacentHTML("beforeend",
+  `<article class="card panel"><h3>${p.title}</h3><p>${p.text}</p><div class="tags">${p.tags.map(t=>`<small>${t}</small>`).join("")}</div><a class="go" href="${p.link}">View project</a></article>`));
+ME.social.forEach(([n,u]) => $("social").insertAdjacentHTML("beforeend", `<a href="${u}" target="_blank" rel="noopener">${n}</a>`));
+
+/* Card spotlight follows cursor */
+document.querySelectorAll(".card").forEach(c => c.addEventListener("pointermove", e => {
+  const r = c.getBoundingClientRect(); c.style.setProperty("--x", e.clientX - r.left + "px"); c.style.setProperty("--y", e.clientY - r.top + "px");
+}));
+
+/* Active nav link */
+const links = [...document.querySelectorAll("nav a")];
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.hash === "#" + e.target.id)); }), { rootMargin: "-45% 0px -50% 0px" });
+document.querySelectorAll("header[id],section[id]").forEach(s => io.observe(s));
+
+/* Hero: particle network that reaches toward the cursor */
+(() => {
+  const cv = $("field"), ctx = cv.getContext("2d"), still = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  let W, H, dpr, pts = [], m = { x: -999, y: -999 };
+  function size() {
+    dpr = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.min(110, Math.floor(W * H / 14000));
+    pts = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35 }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      if (!still) { p.x += p.vx; p.y += p.vy; }
+      if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+    }
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      for (let j = i + 1; j < pts.length; j++) {
+        const b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 130) { ctx.strokeStyle = `rgba(138,123,255,${(1 - d / 130) * .35})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      }
+      const dm = Math.hypot(a.x - m.x, a.y - m.y);
+      if (dm < 190) { ctx.strokeStyle = `rgba(143,227,255,${(1 - dm / 190) * .7})`; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
+      ctx.fillStyle = dm < 190 ? "#8FE3FF" : "rgba(200,210,255,.7)"; ctx.beginPath(); ctx.arc(a.x, a.y, dm < 190 ? 2.2 : 1.5, 0, 6.283); ctx.fill();
+    }
+    if (!still) requestAnimationFrame(draw);
+  }
+  addEventListener("resize", () => { size(); if (still) draw(); });
+  cv.parentElement.addEventListener("pointermove", e => { const r = cv.getBoundingClientRect(); m.x = e.clientX - r.left; m.y = e.clientY - r.top; });
+  cv.parentElement.addEventListener("pointerleave", () => { m.x = m.y = -999; });
+  size(); draw();
+})();
+</script>
+</body>
+</html>

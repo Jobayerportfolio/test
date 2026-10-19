@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E4EBE7">
+<title>Link Up – a calm connection game</title>
+<meta name="description" content="Link Up is a slow, calm puzzle game. Join drifting dots into one network. No ads, no pressure.">
+<meta property="og:title" content="Link Up"><meta property="og:description" content="A slow game about connection. Join every dot into one network."><meta property="og:type" content="website">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E4EBE7;--bg2:#D6E0DB;--ink:#26332F;--dim:#5E6F69;--d0:#5F8577;--d1:#55738F;--d2:#8C7AA6;--d3:#7C8A86;--ok:#3F6B5E;--warn:#A98040;--bad:#A8585A;
+  --card:rgba(244,248,246,.84);--edge:rgba(38,51,47,.14);--f:'Lexend',system-ui,sans-serif;--top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px)}
+.dark{--bg:#141A1D;--bg2:#1C2528;--ink:#DCE5E1;--dim:#8FA19B;--d0:#8FB5A6;--d1:#86A5C4;--d2:#B5A4D0;--d3:#A3B0AB;--ok:#8FB5A6;--warn:#D1AD73;--bad:#CF8587;--card:rgba(28,37,40,.88);--edge:rgba(220,229,225,.14)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--ink);font:300 1rem/1.55 var(--f);user-select:none;-webkit-user-select:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--ok);outline-offset:3px;border-radius:12px}
+.hud{position:fixed;left:0;right:0;top:calc(var(--top) + 12px);display:flex;gap:8px;padding:0 14px;pointer-events:none;z-index:5;justify-content:center}
+.pill{flex:1;max-width:480px;display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--card);border:1px solid var(--edge);border-radius:16px}
+#lv{font-weight:400;white-space:nowrap}
+.bar{flex:1;height:4px;border-radius:2px;background:var(--edge);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);transform-origin:left;transition:background .6s}
+.bar.low i{background:var(--warn)}
+#tm{font-weight:400;min-width:2.2ch;text-align:right;font-variant-numeric:tabular-nums}
+.calm .bar,.calm #tm{display:none}
+.tools{display:flex;gap:8px;pointer-events:auto}
+.ib{width:46px;height:46px;display:grid;place-items:center;background:var(--card);border:1px solid var(--edge);border-radius:14px}
+.ib svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.status{position:fixed;left:0;right:0;bottom:calc(var(--bot) + 22px);text-align:center;color:var(--dim);pointer-events:none;z-index:5;padding:0 20px}
+.status b{color:var(--ink);font-weight:500}
+.ov{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(228,235,231,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:auto}
+.dark .ov{background:rgba(20,26,29,.6)}
+.ov[hidden]{display:none}
+.card{width:min(430px,100%);padding:30px 26px;background:var(--card);border:1px solid var(--edge);border-radius:24px;animation:in .5s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+h1{font-weight:300;font-size:clamp(2.4rem,11vw,3.2rem);line-height:1;letter-spacing:-.04em;margin-bottom:10px}
+h2{font-weight:400;font-size:1.6rem;line-height:1.2;letter-spacing:-.02em;margin-bottom:8px}
+.card p{color:var(--dim)}
+.list{display:grid;gap:10px;margin-top:22px}
+.row{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:14px 18px;text-align:left;border:1px solid var(--edge);border-radius:16px;transition:border-color .3s,background .3s}
+.row:hover{border-color:var(--ok);background:rgba(95,133,119,.08)}
+.row b{font-weight:500}.row span{color:var(--dim);font-size:.92rem}
+.foot{display:flex;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap}
+.lnk{padding:10px 14px;color:var(--dim);border-radius:12px;font-size:.95rem;text-decoration:none}
+.lnk:hover{color:var(--ink)}
+.btns{display:grid;gap:10px;margin-top:22px}
+.btn{padding:15px 22px;border-radius:14px;font-weight:400;font-size:1.02rem;border:1px solid var(--edge);transition:transform .2s}
+.btn:active{transform:scale(.98)}
+.btn.p{background:var(--ok);color:var(--bg);border-color:var(--ok)}
+.tg{display:flex;justify-content:space-between;align-items:center;padding:14px 4px;border-bottom:1px solid var(--edge)}
+.tg input{appearance:none;width:44px;height:26px;border-radius:13px;background:var(--edge);position:relative;cursor:pointer;transition:background .3s}
+.tg input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--bg);transition:transform .3s}
+.tg input:checked{background:var(--ok)}.tg input:checked::after{transform:translateX(18px)}
+.seg{display:flex;gap:6px;margin:16px 0 6px}
+.seg button{flex:1;padding:9px;border:1px solid var(--edge);border-radius:12px;font-size:.92rem}
+.seg button.on{background:var(--ok);color:var(--bg);border-color:var(--ok)}
+ol.lb{list-style:none;padding:0;margin-top:12px;display:grid;gap:3px}
+ol.lb li{display:grid;grid-template-columns:2.4ch 1fr auto;gap:14px;padding:9px 12px;border-radius:12px;font-variant-numeric:tabular-nums}
+ol.lb li.me{background:rgba(95,133,119,.14)}
+ol.lb li i{font-style:normal;color:var(--dim)}
+.note{font-size:.88rem;margin-top:12px}
+input.nm{width:100%;margin-top:18px;padding:14px 16px;font:inherit;color:var(--ink);background:transparent;border:1px solid var(--edge);border-radius:14px;user-select:text;-webkit-user-select:text}
+.err{color:var(--bad);font-size:.9rem;margin-top:8px;min-height:1.3em}
+.sl{width:100%;margin:2px 0 10px;accent-color:var(--ok)}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.stat div{padding:12px 14px;border:1px solid var(--edge);border-radius:14px}.stat b{display:block;font-weight:400;font-size:1.5rem}.stat span{color:var(--dim);font-size:.85rem}
+.ms{list-style:none;padding:0;margin-top:14px;display:grid;gap:6px}.ms li{display:flex;gap:10px;color:var(--dim)}.ms li.on{color:var(--ink)}.ms li::before{content:"";width:10px;height:10px;margin-top:8px;border-radius:50%;border:1.5px solid var(--dim);flex:none}.ms li.on::before{background:var(--ok);border-color:var(--ok)}
+.how{list-style:none;padding:0;margin-top:16px;display:grid;gap:10px}.how li{padding:12px 14px;border:1px solid var(--edge);border-radius:14px;font-size:.95rem}.how b{font-weight:500}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0" role="img" aria-label="Game board. Drag between dots to link them. With a keyboard, use arrow keys to choose a dot and Enter to link."></canvas>
+<div class="hud">
+  <div class="pill"><span id="lv">Level 1</span><div class="bar" id="barw"><i id="bar"></i></div><b id="tm">60</b></div>
+  <div class="tools">
+    <button class="ib" id="hn" aria-label="Show a hint"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0012 3z"/></svg></button>
+    <button class="ib" id="tr" aria-label="Leaderboard"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3"/></svg></button>
+    <button class="ib" id="pz" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></button>
+  </div>
+</div>
+<div class="status" id="st" aria-live="polite"></div>
+<div class="ov" id="ov"><div class="card" id="card" role="dialog" aria-modal="true"></div></div>
+
+<script>
+/* ===== Shared leaderboard (optional). Leave empty to keep scores on this device only. ===== */
+const BACKEND = { url: "", key: "" };   /* Supabase project URL and anon key */
+const BACK_URL = "./";
+
+const $ = id => document.getElementById(id), cv = $("c"), ctx = cv.getContext("2d");
+const store = { get: (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v) } catch (e) { return d } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} } };
+const set = Object.assign({ sound: true, music: true, haptic: false, theme: "auto", mv: .6, rm: false }, store.get("lu-set", {}));
+const TYPES = { d: { r: 9, reach: 1, sp: 1, am: 1 }, a: { r: 14, reach: 1.35, sp: .6, am: .6 }, w: { r: 6, reach: .8, sp: 1.8, am: .7 }, s: { r: 9, reach: 1, sp: 0, am: 0 } };
+let W, H, dpr, S, maxLen, reachMul = 1.3, area, C = {}, dots = [], links = [], ghosts = [], ripples = [], lv = 1, total = 60, left = 60, mode = "menu", game = "calm", clock = 0;
+let hintPair = null, hintLeft = 3, amb = 0, drag = null, sel = null, kb = 0, kbFrom = null, ptr = { x: 0, y: 0 }, flash = 0, pulse = 0, tut = !store.get("lu-tut", false), hinted = false, playSecs = 0, nudged = false, msgT = 0, R = Math.random;
+const reduce = () => set.rm || matchMedia("(prefers-reduced-motion:reduce)").matches, clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const dayId = () => new Date().toISOString().slice(0, 10);
+const mk = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 };
+const hash = s => { let h = 7; for (const c of s) h = Math.imul(h * 31 + c.charCodeAt(0), 2654435761); return h >>> 0 };
+
+/* ===== Theme ===== */
+function theme() {
+  const dark = set.theme === "dark" || (set.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark", dark);
+  const cs = getComputedStyle(document.documentElement);
+  ["bg", "ink", "dim", "d0", "d1", "d2", "d3", "ok", "warn", "bad"].forEach(k => C[k] = cs.getPropertyValue("--" + k).trim());
+  document.querySelector("meta[name=theme-color]").content = C.bg;
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", theme);
+
+/* ===== Audio: synthesized sound effects and a generative calm soundtrack ===== */
+const AU = { ac: null, on: false, ci: 0 }, PENT = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5, 1568];
+const CHORDS = [[130.8, 196, 293.7, 329.6], [110, 164.8, 246.9, 261.6], [87.3, 130.8, 220, 329.6], [98, 146.8, 220, 246.9]], BELLS = [523.3, 587.3, 659.3, 784, 880, 1046.5];
+function audio() {
+  if (AU.ac) return AU.ac;
+  try {
+    const ac = AU.ac = new (window.AudioContext || window.webkitAudioContext)(), mix = g => { const n = ac.createGain(); n.gain.value = g; return n };
+    AU.master = mix(.9); AU.master.connect(ac.destination); AU.sfx = mix(set.sound ? 1 : 0); AU.sfx.connect(AU.master); AU.mus = mix(0); AU.mus.connect(AU.master);
+    const len = ac.sampleRate * 3, buf = ac.createBuffer(2, len, ac.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5) }
+    AU.rev = ac.createConvolver(); AU.rev.buffer = buf; AU.rev.connect(AU.master);
+  } catch (e) { AU.ac = null }
+  return AU.ac;
+}
+function voice(f, o = {}) {
+  const ac = AU.ac; if (!ac) return; const { type = "sine", delay = 0, a = .01, d = .6, v = .06, bus = "sfx", cut = 3200, to = 0, wet = .35 } = o;
+  const t = ac.currentTime + delay, osc = ac.createOscillator(), g = ac.createGain(), lp = ac.createBiquadFilter(), w = ac.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(f, t); if (to) osc.frequency.exponentialRampToValueAtTime(to, t + a + d);
+  lp.type = "lowpass"; lp.frequency.value = cut;
+  g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d);
+  w.gain.value = wet; osc.connect(lp); lp.connect(g); g.connect(AU[bus]); g.connect(w); w.connect(AU.rev); osc.start(t); osc.stop(t + a + d + .05);
+}
+const sfx = {
+  pick: i => { audio(); voice(PENT[i % 14] * 2, { type: "triangle", d: .18, v: .025 }) },
+  add: (i, delay = 0) => { audio(); const f = PENT[i % 10]; voice(f, { delay, a: .005, d: .5, v: .05 }); voice(f * 2, { delay, d: .25, v: .012 }) },
+  link: n => { audio(); const f = PENT[clamp(n, 0, 13)]; voice(f, { d: 1, v: .06, wet: .5 }); voice(f * 1.5, { delay: .09, d: .9, v: .035, wet: .5 }); voice(f * 3, { delay: .09, d: .35, v: .01 }) },
+  snap: () => { audio(); voice(300, { to: 110, d: .7, v: .045, type: "triangle", cut: 900 }) },
+  err: () => { audio(); voice(196, { type: "triangle", d: .22, v: .03, cut: 700 }); voice(185, { delay: .1, type: "triangle", d: .25, v: .025, cut: 700 }) },
+  ui: () => { audio(); voice(660, { d: .14, v: .03 }) },
+  win: () => { audio(); [0, 2, 4, 5, 7].forEach((k, i) => voice(PENT[k + 2], { delay: i * .16, d: 1.8, v: .05, wet: .6 })) },
+  lose: () => { audio(); [440, 329.6, 261.6].forEach((f, i) => voice(f, { delay: i * .3, d: 1.4, v: .035, wet: .6, cut: 1500 })) }
+};
+function musicOn() {
+  const ac = audio(); if (!ac || AU.on || !set.music) return; AU.on = true; AU.mus.gain.setTargetAtTime(.9 * set.mv, ac.currentTime, 2.5);
+  const chord = () => { if (!AU.on) return; CHORDS[AU.ci++ % 4].forEach(f => { voice(f, { a: 3.5, d: 7, v: .04, bus: "mus", cut: 900, wet: .5 }); voice(f * 1.004, { type: "triangle", a: 3.5, d: 7, v: .018, bus: "mus", cut: 700, wet: .5 }) }); AU.t1 = setTimeout(chord, 8000) };
+  const bell = () => { if (!AU.on) return; voice(BELLS[Math.floor(Math.random() * BELLS.length)], { a: .02, d: 3.5, v: .02, bus: "mus", cut: 2500, wet: .7 }); AU.t2 = setTimeout(bell, 2200 + Math.random() * 4200) };
+  chord(); AU.t2 = setTimeout(bell, 3000);
+}
+function musicOff() { if (!AU.ac) return; AU.on = false; clearTimeout(AU.t1); clearTimeout(AU.t2); AU.mus.gain.setTargetAtTime(0, AU.ac.currentTime, .6) }
+const unlock = () => { audio(); if (AU.ac && AU.ac.state === "suspended") AU.ac.resume(); musicOn() };
+addEventListener("pointerdown", unlock, { once: true }); addEventListener("keydown", unlock, { once: true });
+const buzz = ms => { if (set.haptic && navigator.vibrate) navigator.vibrate(ms) };
+
+/* ===== Layout ===== */
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  S = clamp(Math.min(W, H) / 520, .7, 1.3);
+  area = { x0: 30, x1: W - 30, y0: 104 + (parseInt(getComputedStyle(document.documentElement).getPropertyValue("--top")) || 0), y1: H - 72 };
+  maxLen = Math.min(330, Math.min(W, H) * .46) * (game === "calm" ? 1.12 : 1);
+  dots.forEach(d => { d.hx = clamp(d.hx, area.x0 + d.amp, area.x1 - d.amp); d.hy = clamp(d.hy, area.y0 + d.amp, area.y1 - d.amp) });
+}
+addEventListener("resize", resize);
+
+/* ===== Mathematical patterns ===== */
+const TAU = 6.2832;
+const FORMS = [
+  ["Ring", n => Array.from({ length: n }, (_, i) => [Math.cos(TAU * i / n - 1.57), Math.sin(TAU * i / n - 1.57)])],
+  ["Spiral", n => Array.from({ length: n }, (_, i) => { const r = Math.sqrt((i + .5) / n), t = i * 2.39996; return [r * Math.cos(t), r * Math.sin(t)] })],
+  ["Grid", n => { const c = Math.ceil(Math.sqrt(n)), rw = Math.ceil(n / c); return Array.from({ length: n }, (_, i) => [c > 1 ? (i % c) / (c - 1) * 2 - 1 : 0, rw > 1 ? Math.floor(i / c) / (rw - 1) * 2 - 1 : 0]) }],
+  ["Figure eight", n => Array.from({ length: n }, (_, i) => { const t = TAU * i / n; return [Math.cos(t), Math.sin(t) * Math.cos(t) * 2] })],
+  ["Double ring", n => { const o = Math.ceil(n * .6); return Array.from({ length: n }, (_, i) => i < o ? [Math.cos(TAU * i / o), Math.sin(TAU * i / o)] : [.5 * Math.cos(TAU * (i - o) / (n - o) + .5), .5 * Math.sin(TAU * (i - o) / (n - o) + .5)]) }],
+  ["Twin clusters", n => Array.from({ length: n }, (_, i) => { const k = i % 2 ? 1 : -1, j = Math.floor(i / 2), m = Math.ceil(n / 2), r = .4 * Math.sqrt((j + .5) / m), t = j * 2.39996; return [k * .55 + r * Math.cos(t), k * .45 + r * Math.sin(t)] })],
+  ["Wave", n => Array.from({ length: n }, (_, i) => { const x = n > 1 ? i / (n - 1) * 2 - 1 : 0; return [x, .65 * Math.sin(x * 4.7)] })],
+  ["Knot", n => Array.from({ length: n }, (_, i) => { const t = TAU * i / n; return [Math.sin(3 * t + .5), Math.sin(2 * t)] })],
+  ["Scatter", n => { const p = [], md = 1.1 / Math.sqrt(n); for (let t = 0; p.length < n && t < 800; t++) { const q = [R() * 2 - 1, R() * 2 - 1]; if (p.every(z => Math.hypot(z[0] - q[0], z[1] - q[1]) > md * (t > 500 ? .5 : .85))) p.push(q) } while (p.length < n) p.push([R() * 2 - 1, R() * 2 - 1]); return p }]
+];
+const KINDS = ["o", "l", "e", "p", "s", "v"];
+function pos(d, t) {
+  const w = d.w * t + d.ph;
+  switch (d.k) {
+    case "o": return [d.hx + d.A * Math.cos(w), d.hy + d.A * Math.sin(w)];
+    case "l": return [d.hx + d.A * Math.sin(d.a * w), d.hy + d.B * Math.sin(d.b * d.w * t)];
+    case "e": return [d.hx + d.A * Math.sin(w), d.hy + d.B * .5 * Math.sin(2 * w)];
+    case "p": return [d.hx + d.A * Math.sin(w) * Math.cos(d.th), d.hy + d.A * Math.sin(w) * Math.sin(d.th)];
+    case "s": { const r = d.A * (.65 + .35 * Math.sin(.5 * d.w * t + d.ph)); return [d.hx + r * Math.cos(w), d.hy + r * Math.sin(w)] }
+    default: return [d.hx + d.A * Math.sin(w), d.hy + d.B * Math.sin(.5 * d.w * t + 2 * d.ph)];
+  }
+}
+const lim = (a, b) => maxLen * reachMul * (TYPES[a.t].reach + TYPES[b.t].reach) / 2;
+
+/* Every pattern is checked: neighbours always stay in range, so a winning set of links always exists. */
+function solvable(ds) {
+  const p = ds.map((_, i) => i), f = x => p[x] === x ? x : (p[x] = f(p[x]));
+  for (let i = 0; i < ds.length; i++) for (let j = i + 1; j < ds.length; j++)
+    if (Math.hypot(ds[i].hx - ds[j].hx, ds[i].hy - ds[j].hy) + ds[i].amp + ds[j].amp <= .84 * lim(ds[i], ds[j])) p[f(i)] = f(j);
+  return ds.every((_, i) => f(i) === f(0));
+}
+
+/* ===== Levels ===== */
+function start(n, g) {
+  if (g) game = g; lv = n; hintLeft = 3; hintPair = null; resize(); links = []; ghosts = []; ripples = []; drag = sel = kbFrom = null; kb = 0; clock = 0; hinted = n > 1 || !tut; nudged = false; msgT = 0;
+  R = game === "daily" ? mk(hash(dayId()) + n * 7919) : Math.random;
+  reachMul = 1.3 - Math.min(.3, (n - 1) * .04);
+  const cap = clamp(Math.floor((area.x1 - area.x0) * (area.y1 - area.y0) / (4600 * S * S)), 8, 22), count = n === 1 ? 5 : Math.min(cap, Math.round(5 + (n - 1) * 1.7));
+  const types = Array(count).fill("d"), idx = [...types.keys()].sort(() => R() - .5), special = [];
+  if (n >= 3) special.push("a"); if (n >= 4) special.push("s"); if (n >= 5) for (let k = 0; k < Math.min(4, Math.floor((n - 3) / 2)); k++) special.push("w"); if (n >= 7) special.push("a"); if (n >= 10) special.push("s");
+  special.slice(0, Math.floor(count / 2)).forEach((t, i) => types[idx[i]] = t);
+  const fi = game === "daily" ? Math.floor(R() * FORMS.length) : (n - 1) % FORMS.length, form = FORMS[fi], pts = form[1](count);
+  const cx = (area.x0 + area.x1) / 2, cy = (area.y0 + area.y1) / 2, hw = (area.x1 - area.x0) / 2, hh = (area.y1 - area.y0) / 2;
+  const Abase = (10 + Math.min(n, 14) * 2.6) * S, wb = .22 + .012 * Math.min(n, 14);
+  dots = pts.map((q, i) => {
+    const t = types[i], T = TYPES[t], A = Abase * T.am, k = n === 1 ? (i % 2 ? "o" : "p") : KINDS[Math.floor(R() * KINDS.length)], B = A * (.6 + R() * .4);
+    const lis = [[1, 2], [2, 3], [3, 2]][Math.floor(R() * 3)], amp = k === "o" || k === "s" || k === "p" ? A : Math.hypot(A, B);
+    return { t, k, A, B, amp, a: lis[0], b: lis[1], th: R() * 3.14, ph: R() * TAU, w: wb * T.sp, hx: 0, hy: 0, x: 0, y: 0, born: .15 + i * .09, sc: 0, said: false };
+  });
+  for (let s = 1; s > .3; s *= .94) {
+    dots.forEach((d, i) => { d.hx = clamp(cx + pts[i][0] * hw * s, area.x0 + d.amp, area.x1 - d.amp); d.hy = clamp(cy + pts[i][1] * hh * s, area.y0 + d.amp, area.y1 - d.amp) });
+    if (solvable(dots)) break;
+  }
+  dots.forEach(d => { [d.x, d.y] = pos(d, 0); if (!ST.seen.includes(d.t)) ST.seen += d.t }); if (game === "daily" && !ST.days.includes(dayId())) ST.days.push(dayId()); saveST();
+  total = left = n === 1 ? 90 : 34 + count * 3.4; mode = "play"; document.body.classList.toggle("calm", game === "calm");
+  $("lv").textContent = (game === "daily" ? "Daily " : "Level ") + n; $("ov").hidden = true; status(); if (n > 1) say("Pattern: " + form[0], 2.6);
+  cv.focus({ preventScroll: true });
+}
+
+/* ===== Connectivity ===== */
+function groups() {
+  const p = dots.map((_, i) => i), f = x => p[x] === x ? x : (p[x] = f(p[x]));
+  links.forEach(([a, b]) => p[f(a)] = f(b));
+  const cnt = {}; dots.forEach((_, i) => { const r = f(i); cnt[r] = (cnt[r] || 0) + 1 });
+  const big = +Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+  return { f, big, size: cnt[big] };
+}
+function status() {
+  if (msgT > 0) return;
+  const g = groups();
+  $("st").innerHTML = !hinted ? "Drag from one dot to another" : `Linked <b>${g.size}</b> of <b>${dots.length}</b>`;
+  return g;
+}
+function say(t, s) { $("st").textContent = t; msgT = s }
+
+/* ===== Linking ===== */
+const hit = (x, y) => { let b = null, bd = 38 * Math.max(.9, S); dots.forEach((d, i) => { const k = Math.hypot(d.x - x, d.y - y); if (k < bd) { bd = k; b = i } }); return b };
+function tryLink(a, b) {
+  if (a === b || links.some(([x, y]) => x === a && y === b || x === b && y === a)) return;
+  const A = dots[a], B = dots[b];
+  if (Math.hypot(A.x - B.x, A.y - B.y) > lim(A, B)) { flash = 1; sfx.err(); say("Too far apart. Try a nearer dot.", 2); return }
+  links.push([a, b]); hinted = true; hintPair = null; ST.links++; checkMs(); if (tut) { tut = false; store.set("lu-tut", true) } const g = status();
+  sfx.link(g.size - 2); buzz(10); if (!reduce()) ripples.push({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2, r: 6, life: 1 });
+  if (g.size === dots.length) win();
+}
+cv.addEventListener("pointerdown", e => {
+  if (mode !== "play") return; cv.setPointerCapture(e.pointerId); ptr = { x: e.clientX, y: e.clientY };
+  const i = hit(ptr.x, ptr.y);
+  if (i === null) { sel = null; cutLink(ptr.x, ptr.y); return }
+  if (sel !== null && sel !== i) { tryLink(sel, i); sel = null; drag = null; return }
+  drag = i; sfx.pick(i);
+});
+cv.addEventListener("pointermove", e => { ptr = { x: e.clientX, y: e.clientY } });
+cv.addEventListener("pointerup", e => {
+  if (mode !== "play" || drag === null) return;
+  const i = hit(e.clientX, e.clientY);
+  if (i === null || i === drag) sel = i === drag ? (sel === drag ? null : drag) : null; else { tryLink(drag, i); sel = null }
+  drag = null;
+});
+cv.addEventListener("pointercancel", () => { drag = null });
+cv.addEventListener("keydown", e => {
+  if (mode !== "play" || !dots.length) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") { kb = (kb + 1) % dots.length; sfx.pick(kb); e.preventDefault() }
+  else if (e.key === "ArrowLeft" || e.key === "ArrowUp") { kb = (kb + dots.length - 1) % dots.length; sfx.pick(kb); e.preventDefault() }
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (kbFrom === null) kbFrom = kb; else { tryLink(kbFrom, kb); kbFrom = null } }
+});
+
+/* ===== Frame ===== */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (mode === "play") update(dt); else if (mode === "menu") ambient(dt);
+  ripples.forEach(r => { r.r += 60 * dt; r.life -= dt * .9 }); ripples = ripples.filter(r => r.life > 0);
+  ghosts.forEach(g => g.life -= dt * .8); ghosts = ghosts.filter(g => g.life > 0);
+  flash = Math.max(0, flash - dt * 2); pulse += dt; if (msgT > 0) { msgT -= dt; if (msgT <= 0) { msgT = 0; status() } }
+  draw(); requestAnimationFrame(frame);
+}
+function update(dt) {
+  clock += dt;
+  dots.forEach((d, i) => {
+    [d.x, d.y] = pos(d, clock); d.sc = clamp((clock - d.born) / .6, 0, 1);
+    if (!d.said && clock >= d.born) { d.said = true; sfx.add(i) }
+  });
+  const before = links.length;
+  links = links.filter(([a, b]) => {
+    const A = dots[a], B = dots[b];
+    if (Math.hypot(A.x - B.x, A.y - B.y) > lim(A, B)) { ghosts.push({ ax: A.x, ay: A.y, bx: B.x, by: B.y, life: 1 }); return false }
+    return true;
+  });
+  if (links.length < before) { sfx.snap(); buzz(25); status() }
+  playSecs += dt; ST.secs += dt; if (hintPair && (hintPair.t -= dt) <= 0) hintPair = null; if (playSecs > 600 && !nudged) { nudged = true; say("You have played for ten minutes. A short pause might feel good.", 10) }
+  if (game === "calm") return;
+  left -= dt; if (left <= 0) return lose();
+  $("bar").style.transform = `scaleX(${Math.max(0, left / total)})`; $("barw").classList.toggle("low", left < 8);
+  const s = Math.ceil(left); if ($("tm").textContent != s) $("tm").textContent = s;
+}
+
+function shape(d, r, filled) {
+  ctx.beginPath();
+  if (d.t === "w") { ctx.moveTo(d.x, d.y - r * 1.2); ctx.lineTo(d.x + r * 1.2, d.y); ctx.lineTo(d.x, d.y + r * 1.2); ctx.lineTo(d.x - r * 1.2, d.y); ctx.closePath() }
+  else if (d.t === "s") ctx.roundRect(d.x - r, d.y - r, r * 2, r * 2, 4);
+  else ctx.arc(d.x, d.y, r, 0, TAU);
+  if (filled) ctx.fill(); else ctx.stroke();
+}
+function draw() {
+  ctx.clearRect(0, 0, W, H); ctx.lineCap = "round";
+  const g = dots.length ? groups() : { f: x => x, big: -1 };
+  if (drag !== null && mode === "play") {
+    const d = dots[drag]; ctx.setLineDash([3, 8]); ctx.strokeStyle = C.dim; ctx.globalAlpha = .45; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(d.x, d.y, maxLen * reachMul * TYPES[d.t].reach, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  ghosts.forEach(o => { ctx.globalAlpha = o.life * .5; ctx.strokeStyle = C.bad; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(o.ax, o.ay); ctx.lineTo(o.bx, o.by); ctx.stroke() });
+  ripples.forEach(r => { ctx.globalAlpha = r.life * .4; ctx.strokeStyle = C.ok; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke() });
+  ctx.globalAlpha = 1;
+  links.forEach(([a, b]) => {
+    const A = dots[a], B = dots[b], t = Math.hypot(A.x - B.x, A.y - B.y) / lim(A, B);
+    ctx.strokeStyle = t < .75 ? C.ok : t < .92 ? C.warn : C.bad; ctx.lineWidth = t < .75 ? 2.5 : t < .92 ? 2 : 1.6; ctx.setLineDash(t < .75 ? [] : t < .92 ? [10, 5] : [3, 5]);
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.setLineDash([]);
+  });
+  if (drag !== null && mode === "play") {
+    const A = dots[drag], j = hit(ptr.x, ptr.y), ok = j !== null && j !== drag && Math.hypot(A.x - dots[j].x, A.y - dots[j].y) <= lim(A, dots[j]);
+    ctx.setLineDash([6, 6]); ctx.strokeStyle = flash > 0 ? C.bad : ok ? C.ok : C.dim; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(ok ? dots[j].x : ptr.x, ok ? dots[j].y : ptr.y); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if (tut && mode === "play" && dots.length > 1) {
+    let bi = 0, bj = 1, bd = 1e9; for (let i = 0; i < dots.length; i++) for (let j = i + 1; j < dots.length; j++) { const k = Math.hypot(dots[i].x - dots[j].x, dots[i].y - dots[j].y); if (k < bd) { bd = k; bi = i; bj = j } }
+    const A = dots[bi], B = dots[bj], t = Math.min(1, (pulse % 2.8) / 1.8), e = t * t * (3 - 2 * t), x = A.x + (B.x - A.x) * e, y = A.y + (B.y - A.y) * e;
+    ctx.setLineDash([4, 6]); ctx.strokeStyle = C.ok; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.globalAlpha = .35; ctx.fillStyle = C.ok; ctx.beginPath(); ctx.arc(x, y, 16, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  if (hintPair && mode === "play") {
+    const A = dots[hintPair.a], B = dots[hintPair.b]; ctx.globalAlpha = .4 + Math.sin(pulse * 3) * .25; ctx.strokeStyle = C.ok; ctx.lineWidth = 3; ctx.setLineDash([2, 9]);
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.setLineDash([]); [A, B].forEach(P => { ctx.beginPath(); ctx.arc(P.x, P.y, 20, 0, TAU); ctx.stroke() }); ctx.globalAlpha = 1;
+  }
+  dots.forEach((d, i) => {
+    if (d.sc <= 0) return; const e = d.sc * d.sc * (3 - 2 * d.sc), r = TYPES[d.t].r * Math.max(.9, S) * e, col = C["d" + "daws".indexOf(d.t)], inNet = links.length && g.f(i) === g.big || mode === "won";
+    ctx.globalAlpha = e; ctx.fillStyle = ctx.strokeStyle = col; ctx.lineWidth = 2.2;
+    if (d.t === "a") { ctx.globalAlpha = .25 * e; shape(d, r + 6, false); ctx.globalAlpha = e }
+    shape(d, r, inNet); if (!inNet) { ctx.globalAlpha = .12 * e; shape(d, r, true) } ctx.globalAlpha = 1;
+    if (i === drag || i === sel || i === kbFrom || (document.activeElement === cv && i === kb && mode === "play")) {
+      ctx.strokeStyle = C.ink; ctx.globalAlpha = .55; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(d.x, d.y, r + 9 + Math.sin(pulse * 2) * 1.5, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+    }
+  });
+}
+
+/* ===== Progress, milestones, hints, ambient menu ===== */
+const ST = Object.assign({ links: 0, cleared: 0, secs: 0, maxLv: 0, seen: "", days: [] }, store.get("lu-stats", {}));
+const saveST = () => store.set("lu-stats", ST);
+const LINES = ["Take a breath.", "Slow is smooth.", "Nothing to rush.", "Well connected.", "Notice how calm that felt.", "One thing at a time."];
+const MS = [["First link", () => ST.links >= 1], ["Level 5 cleared", () => ST.maxLv >= 5], ["Level 10 cleared", () => ST.maxLv >= 10], ["100 links made", () => ST.links >= 100], ["Met every kind of dot", () => ST.seen.length >= 4], ["Daily on 3 different days", () => ST.days.length >= 3], ["One quiet hour played", () => ST.secs >= 3600]];
+function checkMs() { const got = store.get("lu-ms", []); MS.forEach(([n, f]) => { if (!got.includes(n) && f()) { got.push(n); store.set("lu-ms", got); say("Milestone: " + n, 4) } }) }
+function streak() { const key = x => new Date(x).toISOString().slice(0, 10), has = x => ST.days.includes(x); let n = 0, x = Date.now(); if (!has(key(x))) x -= 864e5; while (has(key(x))) { n++; x -= 864e5 } return n }
+function hint() {
+  if (mode !== "play") return; if (game !== "calm" && hintLeft <= 0) { say("No hints left on this level.", 2); return }
+  const g = groups(); let best = null, bd = 1e9;
+  for (let i = 0; i < dots.length; i++) for (let j = i + 1; j < dots.length; j++) { if (g.f(i) === g.f(j)) continue; const d = Math.hypot(dots[i].x - dots[j].x, dots[i].y - dots[j].y); if (d <= lim(dots[i], dots[j]) * .8 && d < bd) { bd = d; best = [i, j] } }
+  if (!best) { say("No safe link right now. Wait a moment.", 2); return }
+  if (game !== "calm") hintLeft--; hintPair = { a: best[0], b: best[1], t: 5 }; sfx.ui(); say("Try linking these two" + (game === "calm" ? "" : ` (${hintLeft} hints left)`), 3);
+}
+function cutLink(x, y) {
+  let k = -1, bd = 16; links.forEach(([a, b], i) => { const A = dots[a], B = dots[b], dx = B.x - A.x, dy = B.y - A.y, u = clamp(((x - A.x) * dx + (y - A.y) * dy) / (dx * dx + dy * dy || 1), 0, 1), d = Math.hypot(x - A.x - u * dx, y - A.y - u * dy); if (d < bd) { bd = d; k = i } });
+  if (k < 0) return; const [a, b] = links.splice(k, 1)[0]; ghosts.push({ ax: dots[a].x, ay: dots[a].y, bx: dots[b].x, by: dots[b].y, life: 1 }); sfx.ui(); status();
+}
+function ambientInit() {
+  game = "calm"; reachMul = 1.3; resize(); R = Math.random; amb = 0; clock = 0; links = [];
+  const n = clamp(Math.floor(W * H / 24000), 10, 18), pts = FORMS[Math.floor(R() * FORMS.length)][1](n), cx = (area.x0 + area.x1) / 2, cy = (area.y0 + area.y1) / 2, hw = (area.x1 - area.x0) / 2, hh = (area.y1 - area.y0) / 2;
+  dots = pts.map((q, i) => { const A = (16 + R() * 16) * S, B = A * (.6 + R() * .4); return { t: "d", k: KINDS[Math.floor(R() * KINDS.length)], A, B, amp: A * 1.5, a: 1 + Math.floor(R() * 3), b: 2, th: R() * 3.14, ph: R() * TAU, w: .16 + R() * .1, hx: clamp(cx + q[0] * hw * .9, area.x0, area.x1), hy: clamp(cy + q[1] * hh * .9, area.y0, area.y1), x: 0, y: 0, born: i * .06, sc: 0, said: true } });
+}
+function ambient(dt) {
+  clock += dt; dots.forEach(d => { [d.x, d.y] = pos(d, clock); d.sc = clamp((clock - d.born) / .9, 0, 1) });
+  if (++amb % 8 === 0) { links = []; for (let i = 0; i < dots.length; i++) for (let j = i + 1; j < dots.length; j++) if (Math.hypot(dots[i].x - dots[j].x, dots[i].y - dots[j].y) < maxLen * .55) links.push([i, j]) }
+}
+
+/* ===== Leaderboard =====
+const boardId = g => g === "daily" ? "daily-" + dayId() : "run";
+async function getBoard(id) {
+  const local = store.get("lu-lb-" + id, []);
+  if (!BACKEND.url) return { rows: local, online: false };
+  try {
+    const r = await fetch(`${BACKEND.url}/rest/v1/scores?board=eq.${encodeURIComponent(id)}&select=name,score&order=score.desc,created_at.asc&limit=10`, { headers: { apikey: BACKEND.key, Authorization: "Bearer " + BACKEND.key } });
+    if (!r.ok) throw 0; return { rows: await r.json(), online: true };
+  } catch (e) { return { rows: local, online: false } }
+}
+async function postScore(id, name, score) {
+  const l = store.get("lu-lb-" + id, []); l.push({ name, score }); l.sort((a, b) => b.score - a.score); store.set("lu-lb-" + id, l.slice(0, 10));
+  if (!BACKEND.url) return false;
+  try { const r = await fetch(BACKEND.url + "/rest/v1/scores", { method: "POST", headers: { apikey: BACKEND.key, Authorization: "Bearer " + BACKEND.key, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ board: id, name, score }) }); return r.ok } catch (e) { return false }
+}
+function fill(ol, rows, n) {
+  const me = store.get("lu-name", ""); ol.innerHTML = ""; if (!rows.length) { ol.innerHTML = "<li><span></span><span>No scores yet. Be the first.</span><i></i></li>"; return }
+  rows.slice(0, n).forEach((r, i) => { const li = document.createElement("li"), a = document.createElement("i"), b = document.createElement("span"), c = document.createElement("b"); if (r.name === me) li.className = "me"; a.textContent = i + 1; b.textContent = r.name; c.textContent = r.score; li.append(a, b, c); ol.append(li) });
+}
+async function board(tab, back) {
+  tab = tab || "run"; sfx.ui();
+  show(`<h2>Leaderboard</h2><p>Levels cleared in one run.</p>
+  <div class="seg"><button id="t1" class="${tab === "run" ? "on" : ""}">Timed runs</button><button id="t2" class="${tab !== "run" ? "on" : ""}">Today's daily</button></div>
+  <ol class="lb" id="lb"><li><span></span><span>Loading</span><i></i></li></ol><p class="note" id="ln"></p>
+  <div class="btns"><button class="btn" id="bk">Back</button></div>`, "bk");
+  $("t1").onclick = () => board("run", back); $("t2").onclick = () => board("daily", back); $("bk").onclick = back || menu;
+  const { rows, online } = await getBoard(tab === "run" ? "run" : boardId("daily")); if (!$("lb")) return;
+  fill($("lb"), rows, 10); $("ln").textContent = online ? "Shared leaderboard." : "Saved on this device only.";
+}
+
+/* ===== Screens ===== */
+function show(html, focus) { $("card").innerHTML = html; $("ov").hidden = false; $("card").style.animation = "none"; void $("card").offsetWidth; $("card").style.animation = ""; if ($(focus)) $(focus).focus({ preventScroll: true }) }
+function resume() { mode = "play"; $("ov").hidden = true; last = performance.now(); cv.focus({ preventScroll: true }) }
+function menu() {
+  mode = "menu"; ambientInit(); document.body.classList.remove("calm"); saveST();
+  const cl = store.get("lu-calm", 1), sk = streak();
+  show(`<h1>Link Up</h1><p>A slow game about connection. Join every dot into one network.</p>
+  <div class="list">
+  <button class="row" id="m1"><b>Calm</b><span>${cl > 1 ? "Continue at level " + cl : "No timer. Play at your own pace."}</span></button>
+  <button class="row" id="m2"><b>Timed run</b><span>A gentle clock. Climb the leaderboard.</span></button>
+  <button class="row" id="m3"><b>Daily</b><span>${sk ? sk + (sk === 1 ? " day" : " days") + " in a row. " : ""}The same patterns for everyone.</span></button></div>
+  <p class="note">Top players</p><ol class="lb" id="t3"><li><span></span><span>Loading</span><i></i></li></ol>
+  <div class="foot"><button class="lnk" id="mh">How to play</button><button class="lnk" id="mb">Leaderboard</button><button class="lnk" id="mt">Progress</button><button class="lnk" id="ms">Settings</button><a class="lnk" href="${BACK_URL}">Portfolio</a></div>`, "m1");
+  $("m1").onclick = () => { sfx.ui(); start(cl, "calm") }; $("m2").onclick = () => { sfx.ui(); start(1, "run") }; $("m3").onclick = () => { sfx.ui(); start(1, "daily") };
+  $("mb").onclick = () => board("run"); $("ms").onclick = () => { sfx.ui(); settings(menu) }; $("mh").onclick = () => { sfx.ui(); howto(menu) }; $("mt").onclick = () => { sfx.ui(); progress(menu) };
+  getBoard("run").then(r => { if ($("t3")) fill($("t3"), r.rows, 3) });
+}
+function settings(back) {
+  show(`<h2>Settings</h2><label class="tg">Sound effects<input type="checkbox" id="s1" ${set.sound ? "checked" : ""}></label>
+  <label class="tg">Calm music<input type="checkbox" id="s3" ${set.music ? "checked" : ""}></label>
+  <input class="sl" id="mv" type="range" min="0.1" max="1" step="0.05" value="${set.mv}" aria-label="Music volume">
+  <label class="tg">Vibration<input type="checkbox" id="s2" ${set.haptic ? "checked" : ""}></label>
+  <label class="tg">Reduce motion<input type="checkbox" id="s4" ${set.rm ? "checked" : ""}></label>
+  <div class="seg" role="group" aria-label="Theme"><button data-t="auto">Auto</button><button data-t="light">Mist</button><button data-t="dark">Dusk</button></div>
+  <p class="note">Your progress stays on this device. Only a leaderboard name you choose to save is ever shared.</p>
+  <div class="btns"><button class="btn p" id="sb">Done</button><button class="btn" id="rz">Reset all progress</button></div>`, "sb");
+  const save = () => store.set("lu-set", set), mark = () => document.querySelectorAll("[data-t]").forEach(b => b.classList.toggle("on", b.dataset.t === set.theme)); mark();
+  $("s1").onchange = e => { set.sound = e.target.checked; save(); audio(); if (AU.sfx) AU.sfx.gain.value = set.sound ? 1 : 0; sfx.ui() };
+  $("s3").onchange = e => { set.music = e.target.checked; save(); set.music ? musicOn() : musicOff() };
+  $("mv").oninput = e => { set.mv = +e.target.value; save(); if (AU.ac && AU.on) AU.mus.gain.setTargetAtTime(.9 * set.mv, AU.ac.currentTime, .1) };
+  $("s2").onchange = e => { set.haptic = e.target.checked; save(); buzz(20) };
+  $("s4").onchange = e => { set.rm = e.target.checked; save() };
+  document.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { set.theme = b.dataset.t; save(); theme(); mark() });
+  $("rz").onclick = e => { if (e.target.dataset.sure) { try { Object.keys(localStorage).filter(k => k.startsWith("lu-")).forEach(k => localStorage.removeItem(k)) } catch (x) {} location.reload() } else { e.target.dataset.sure = 1; e.target.textContent = "Tap again to confirm" } };
+  $("sb").onclick = back;
+}
+function howto(back) {
+  show(`<h2>How to play</h2><ul class="how">
+  <li><b>Link.</b> Drag from one dot to another, or tap one and then the other.</li>
+  <li><b>Join them all.</b> Make one connected network. Any route works.</li>
+  <li><b>Watch the line.</b> Solid is safe, dashed is stretching, dotted is about to snap.</li>
+  <li><b>Undo.</b> Tap a link to remove it.</li>
+  <li><b>Stuck?</b> The bulb button shows a safe link to try.</li>
+  <li><b>Dots.</b> Circle: Drifter. Large ring: Anchor, reaches farther. Diamond: Wisp, quick with a short reach. Square: Sleeper, stays still.</li></ul>
+  <div class="btns"><button class="btn p" id="hb">Got it</button></div>`, "hb"); $("hb").onclick = back || menu;
+}
+function progress(back) {
+  const got = store.get("lu-ms", []);
+  show(`<h2>Your progress</h2><div class="stat"><div><b>${ST.maxLv}</b><span>Best level cleared</span></div><div><b>${ST.cleared}</b><span>Levels cleared</span></div><div><b>${ST.links}</b><span>Links made</span></div><div><b>${Math.floor(ST.secs / 60)}</b><span>Minutes played</span></div></div>
+  <ul class="ms">${MS.map(([n]) => `<li class="${got.includes(n) ? "on" : ""}">${n}</li>`).join("")}</ul><div class="btns"><button class="btn p" id="pb">Back</button></div>`, "pb"); $("pb").onclick = back || menu;
+}
+function win() {
+  mode = "won"; sfx.win(); buzz(15); ST.cleared++; ST.maxLv = Math.max(ST.maxLv, lv); if (game === "calm") store.set("lu-calm", Math.max(store.get("lu-calm", 1), lv + 1)); saveST(); checkMs(); const t = (total - left).toFixed(0);
+  setTimeout(() => { show(`<h2>Level ${lv} linked</h2><p>${game === "calm" ? LINES[lv % LINES.length] : `Finished in ${t} seconds.`}</p>
+    <div class="btns"><button class="btn p" id="nx">Next level</button><button class="btn" id="mn">Main menu</button></div>`, "nx");
+    $("nx").onclick = () => { sfx.ui(); start(lv + 1) }; $("mn").onclick = menu }, 1100);
+}
+function lose() {
+  mode = "lost"; saveST(); const cleared = lv - 1, g = groups(), id = boardId(game), un = dots.length - g.size; sfx.lose();
+  if (cleared > store.get("lu-best", 0)) store.set("lu-best", cleared);
+  show(`<h2>Run ended</h2><p>You cleared <b>${cleared}</b> level${cleared === 1 ? "" : "s"}. ${un} dot${un === 1 ? "" : "s"} stayed unlinked.</p>
+  <input class="nm" id="nm" maxlength="16" placeholder="Your name" aria-label="Your name" value="${(store.get("lu-name", "") + "").replace(/[<>"&]/g, "")}"><div class="err" id="er" role="alert"></div>
+  <div class="btns"><button class="btn p" id="sv">Save score</button><button class="btn" id="sh">Share</button><button class="btn" id="pa">Play again</button><button class="btn" id="mn">Main menu</button></div>`, "nm");
+  let saved = false;
+  $("sv").onclick = async () => {
+    const n = $("nm").value.trim().replace(/[<>]/g, "");
+    if (!n) { $("er").textContent = "Enter a name first."; return }
+    if (cleared < 1) { $("er").textContent = "Clear at least one level to save a score."; return }
+    if (saved) return; saved = true; store.set("lu-name", n); $("sv").textContent = "Saving";
+    await postScore(id, n, cleared); sfx.ui(); board(game === "daily" ? "daily" : "run", menu);
+  };
+  $("nm").oninput = () => $("er").textContent = "";
+  $("sh").onclick = async () => { const txt = `I cleared ${cleared} levels in Link Up. Can you beat it?`; try { if (navigator.share) await navigator.share({ title: "Link Up", text: txt, url: location.href }); else { await navigator.clipboard.writeText(txt + " " + location.href); $("sh").textContent = "Copied" } } catch (e) {} };
+  $("pa").onclick = () => start(1); $("mn").onclick = menu;
+}
+function pause() {
+  if (mode !== "play") return; mode = "pause";
+  show(`<h2>Paused</h2><p>Your network is waiting.</p><div class="btns"><button class="btn p" id="rs">Resume</button><button class="btn" id="rl">Restart level</button><button class="btn" id="bd">Leaderboard</button><button class="btn" id="st2">Settings</button><button class="btn" id="mn">Main menu</button></div>`, "rs");
+  $("rs").onclick = resume; $("rl").onclick = () => start(lv); $("mn").onclick = menu;
+  $("bd").onclick = () => board(game === "daily" ? "daily" : "run", pause2); $("st2").onclick = () => settings(pause2);
+}
+const pause2 = () => { mode = "play"; pause() };
+$("pz").onclick = pause; $("hn").onclick = hint;
+$("tr").onclick = () => { if (mode === "play") { mode = "pause"; board(game === "daily" ? "daily" : "run", pause2) } else if (mode === "menu") board("run", menu) };
+document.addEventListener("visibilitychange", () => { if (document.hidden) { saveST(); pause(); if (AU.ac) AU.ac.suspend() } else if (AU.ac) AU.ac.resume() });
+addEventListener("keydown", e => { if (e.key === "Escape") pause() });
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+theme(); resize(); menu(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
